@@ -1,0 +1,45 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model Category {
+  id          BigInt          @id @default(autoincrement())
+  created_at  DateTime        @default(now()) @db.Timestamptz(6)
+  name        String          @unique @db.VarChar
+  description String?
+  type        TransactionType
+  Transaction Transaction[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model User {
+  id           BigInt        @id @default(autoincrement())
+  created_at   DateTime      @default(now()) @db.Timestamptz(6)
+  name         String        @db.VarChar
+  email        String        @unique @db.VarChar
+  password     String        @db.VarChar
+  transactions Transaction[]
+}
+
+model Transaction {
+  id          BigInt    @id @default(autoincrement())
+  created_at  DateTime  @default(now()) @db.Timestamptz(6)
+  category_id BigInt
+  amount      Float
+  description String?
+  user_id     BigInt
+  user        User?     @relation(fields: [user_id], references: [id])
+  category    Category? @relation(fields: [category_id], references: [id])
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+}
